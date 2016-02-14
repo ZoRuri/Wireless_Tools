@@ -39,6 +39,8 @@ private slots:
 
     void channelLoop();
 
+    void on_pbClear_clicked();
+
 private:
     Ui::Widget *ui;
 
@@ -50,7 +52,8 @@ private:
     QTimer timer;
     QThread channelThread;
 
-    int channel = 1;
+    int channel;
+    char command[30];
 };
 
 #endif // WIDGET_H

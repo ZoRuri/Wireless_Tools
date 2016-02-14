@@ -52,6 +52,12 @@ void Widget::on_pbStart_clicked()
 
         ui->label_Status->setText("Status : Running");
 
+        channel = 1;
+
+        ui->label_Channel->setText(QString("Channel : %1").arg(channel));
+
+        sprintf(command, "iwconfig %s channel %d", selectDevice.deviceLabel.toStdString().c_str(), channel);
+        system(command);
     }
 
 }
@@ -129,9 +135,8 @@ void Widget::setCaptureInfo(CaptureInfo captureInfo)
 
 void Widget::channelLoop()
 {
-    char command[30];
-
     ui->label_Channel->setText(QString("Channel : %1").arg(channel));
+
     sprintf(command, "iwconfig %s channel %d", selectDevice.deviceLabel.toStdString().c_str(), channel);
     system(command);
 
@@ -140,4 +145,12 @@ void Widget::channelLoop()
 
     ++channel;
 
+}
+
+void Widget::on_pbClear_clicked()
+{
+    while (int i = ui->treeWidget->topLevelItemCount())
+    {
+        delete ui->treeWidget->topLevelItem(i - 1);
+    }
 }
