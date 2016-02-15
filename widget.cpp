@@ -13,7 +13,7 @@ Widget::Widget(QWidget *parent) :
     QObject::connect(&scanner, SIGNAL(captured(CaptureInfo)), this, SLOT(setCaptureInfo(CaptureInfo)), Qt::BlockingQueuedConnection);
 
     QObject::connect(&channelThread, SIGNAL(started()), &timer, SLOT(start()));
-    QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(channelLoop()), Qt::BlockingQueuedConnection);
+    QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(channelLoop()));
     QObject::connect(&channelThread, SIGNAL(finished()), &timer, SLOT(stop()));
 
 }
@@ -29,7 +29,6 @@ void Widget::on_pbSelectDevice_clicked()
     selectDevice.exec();
 
     ui->label_Device->setText(QString("Device : %1").arg(QString(selectDevice.deviceLabel)));
-
 }
 
 void Widget::on_pbStart_clicked()
@@ -46,7 +45,7 @@ void Widget::on_pbStart_clicked()
         scannerThread.start();
         scanner.getHandle(selectDevice.handle);
 
-        timer.setInterval(1000);
+        timer.setInterval(1300);
         timer.moveToThread(&channelThread);
         channelThread.start();
 
@@ -54,10 +53,10 @@ void Widget::on_pbStart_clicked()
 
         channel = 1;
 
-        ui->label_Channel->setText(QString("Channel : %1").arg(channel));
-
         sprintf(command, "iwconfig %s channel %d", selectDevice.deviceLabel.toStdString().c_str(), channel);
         system(command);
+
+        ui->label_Channel->setText(QString("Channel : %1").arg(channel));
     }
 
 }
@@ -66,10 +65,14 @@ void Widget::on_pbStop_clicked()
 {
     channelThread.quit();
     channelThread.wait();
+    qDebug() << "channelThread stop";
 
     scanner.status = false;
+    qDebug() << "scannerThread status";
     scannerThread.quit();
+    qDebug() << "scannerThread quit";
     scannerThread.wait();
+    qDebug() << "scannerThread stop";
 
     ui->label_Status->setText("Status : Stopped");
 }
@@ -140,11 +143,10 @@ void Widget::channelLoop()
     sprintf(command, "iwconfig %s channel %d", selectDevice.deviceLabel.toStdString().c_str(), channel);
     system(command);
 
-    if (channel == 14)
-        channel = 0;
+    channel += 6;
 
-    ++channel;
-
+    if (channel > 14)
+        channel = channel % 6 + 1;
 }
 
 void Widget::on_pbClear_clicked()

@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <QThread>
 #include <QObject>
+#include <QTextCodec>
 
 #include "selectdevice.h"
 

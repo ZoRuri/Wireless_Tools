@@ -23,6 +23,10 @@ void Scanner::start()
 
         CaptureInfo captureInfo;
 
+        int i = 0;
+
+        QByteArray temp;
+
         int SIZE_RADIOTAB = *(data+2);
 
         if ( ntohs(*(data+SIZE_RADIOTAB)) == 0x8000 && (data[SIZE_RADIOTAB+4] == 0xff && data[SIZE_RADIOTAB+5] == 0xff && data[SIZE_RADIOTAB+6] == 0xff && data[SIZE_RADIOTAB+7] == 0xff && data[SIZE_RADIOTAB+8] == 0xff && data[SIZE_RADIOTAB+9] == 0xff )) // Only Beacon frame && Broadcast
@@ -32,12 +36,17 @@ void Scanner::start()
             for(SSIDlen=0;SSIDlen<data[SIZE_RADIOTAB+37];++SSIDlen)
             {
                 if(127 < *(data+SIZE_RADIOTAB+38+SSIDlen)){
-                    QString temp;
                     temp.append(*(data+SIZE_RADIOTAB+38+SSIDlen));
-                    captureInfo.SSID.append(temp.toUtf8());
-                    temp.clear();
+                    ++i;
+                    if (i == 3) {
+                        captureInfo.SSID.append(temp);
+                        qDebug() << captureInfo.SSID;
+                        temp.clear();
+                        i = 0;
+                    }
                 }
-                captureInfo.SSID.append(*(data+SIZE_RADIOTAB+38+SSIDlen));
+                else
+                    captureInfo.SSID.append(*(data+SIZE_RADIOTAB+38+SSIDlen));
             }
 
             SSIDlen = data[SIZE_RADIOTAB+37];
